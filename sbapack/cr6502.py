@@ -405,10 +405,10 @@ def CrossInit():
     # i.e.
     #      dec.Asm.Max_Address = 0
     #
-    #     .org $100
+    #     .or $100
     #     .db 1     ; FAIL; address $0100 > $0000
     #
-    #     .org $0
+    #     .or $0
     #     .db 1     ; PASS; address $0000 <= $0000
     #dec.Asm.Max_Address = dec.MAX16
     dec.Asm.Max_Address = 0x1FFFFFF
