@@ -26,7 +26,7 @@ That is, this assembly ...
 *** Warning: Target program memory full
 ```
 
-The patch in [cr6502.py](sbapack/cr6502.py) increases the limit to 32 MB (the maximum
+The patch in [cr6502.py](sbapack/cr6502.py#L414) increases the limit to 32 MB (the maximum
  size for a ProDOS volume.)
 
 Unfortunately, there is no command line switch or directive to turn this warning off.
@@ -55,10 +55,10 @@ i.e.
         .db 256 - * ; supposed to be FE: 02
 ```
 
-The patch in [assem.py](sbapack/assem.py) fixes the bug where whitespaces in
- an expression cause sbasm to ignore the rest of the line. The heart of the
-function `EvalExpr()` was literally re-written. Guess who _didn't_ fail their
-301 Compilers and Intepretors class.
+The patch in [assem.py](sbapack/assem.py#L741-L841) fixes the bug where whitespaces in
+ an expression cause sbasm to ignore the rest of the line.  The heart of the
+function `EvalExpr()` was literally re-written from scratch. Guess who _didn't_ fail their
+301 Compilers and Interpreters class. :-)
 
 
 # Thanks
