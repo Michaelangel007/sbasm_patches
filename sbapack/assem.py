@@ -727,6 +727,17 @@ def AssignLabel(newlabel, macrolevel):
 
 # -----------------------------------------------------------------------------
 
+def showParsingCursor( pointer ):
+    #print( "0         1         2         3         4" )
+    #print( "01234567890123456789012345678901234567890" )
+    print( dec.Asm.Parse_Line )
+    padding = '{message:{fill}{align}{width}}'.format( message='^', fill=' ',align='>',width = pointer + 1 )
+    percent = ' ' + str(pointer) +  ' / ' + str(len(dec.Asm.Parse_Line))
+    print( padding + percent )
+
+
+# -----------------------------------------------------------------------------
+
 def EvalExpr():
 
     """
@@ -734,6 +745,7 @@ def EvalExpr():
     that there is something in the operand field.
     Returns tuple: (value of expression, forward ref label, memory mode of
     label)
+    NOTE: The current line being parsed pointer MUST be on a space, comma, or right parenthesis when we exit
     """
 
     negate = NowChar()
@@ -741,34 +753,86 @@ def EvalExpr():
         # The negate symbole preceeds the value
         IncParsePointer()
 
-    operators = '+-*/\\&^|!=<>'
+    operators = '+-*/\\&^|!=<>;,)'   # OP SPC BUGFIX: Add operators that terminate expression: :,)
     totalval = GetValue()
 
-    while NowChar() in operators:
-        if dec.Flags.ErrorInLine:
-            # Don't bother to continue, value will not be correct anyway
-            break
+    line_length = len(dec.Asm.Parse_Line) - 1
+
+    while dec.Asm.Parse_Pointer < line_length:
+
+        # OP SPC BUGFIX
+        if NowChar() == ' ':
+            FindNextNonSpace()
+
+            # EOL?
+            if  dec.Asm.Parse_Pointer > line_length:
+                break;
+
         operator = NowChar(True)
-        if operator == '<':
-            # Could be <= , <> , <<
-            if NowChar() in '=><':
-                operator += NowChar(True)
-        elif operator == '>':
-            # Could be >= or >>
-            if NowChar() in '=>':
-                operator += NowChar(True)
-        elif operator == '!':
-            if NowChar() == '=':
-                operator = '<>'
-                IncParsePointer()
-        if NowChar() != ' ':
+        if operator in operators:
+
+            if dec.Flags.ErrorInLine:
+                # Don't bother to continue, value will not be correct anyway
+                break
+
+            if operator == ',' or operator == ')':
+                # Handle multiple arguments
+                # e.g.
+                #     .ds <val1>,<val2>
+                #     OP (addr),y
+                #
+                # -1 because parsing pointer was advanced above with NowChar()
+                dec.Asm.Parse_Pointer = dec.Asm.Parse_Pointer - 1;
+                break;
+            elif operator == ';':
+                # -2 because parsing pointer was advanced above with NowChar()
+                dec.Asm.Parse_Pointer = dec.Asm.Parse_Pointer - 2;
+                break;
+            elif operator == '<':
+                # Could be <= , <> , <<
+                if NowChar() in '=><':
+                    operator += NowChar(True)
+            elif operator == '>':
+                # Could be >= or >>
+                if NowChar() in '=>':
+                    operator += NowChar(True)
+            elif operator == '!':
+                if NowChar() == '=':
+                    operator = '<>'
+                    IncParsePointer()
+
+            # OP SPC BUGFIX
+            if NowChar() == ' ':
+                FindNextNonSpace()
+                if  dec.Asm.Parse_Pointer > line_length:
+                    break;
+
             # There's something out there, get it.
+            value_pointer = dec.Asm.Parse_Pointer
+
             newvalue = GetValue()
+
+            # Prevent extra advancement due to bottom of while loop
+            dec.Asm.Parse_Pointer = dec.Asm.Parse_Pointer - 1
+
             if not dec.Flags.ErrorInLine:
                 totalval = Calculate(totalval, newvalue, operator)
+            else:
+                # Actually show WHERE the error was -- like clang
+                showParsingCursor( value_pointer )
         else:
             errors.DoError('valerr', False)
+
+            # Actually show WHERE the error was -- like clang
+            showParsingCursor( dec.Asm.Parse_Pointer )
+
             break
+
+        dec.Asm.Parse_Pointer = dec.Asm.Parse_Pointer + 1
+
+    # EOL? Backup to last space on EOL to deal with shitty parsing design requiring space on the EOL
+    if dec.Asm.Parse_Pointer > line_length:
+       dec.Asm.Parse_Pointer = line_length;
 
     if negate == '~':
         # The value needs to be negated first
