@@ -1,16 +1,15 @@
 # sbasm patches
 
-Bugs fixed in sbasm 3.03.06:
+Bugs fixed in [sbasm](https://www.sbprojects.net/sbasm/) 3.03.06:
 
 * [x] Allow assembled output files > 64 KB 
 * [x] Allow whitespace in expressions
 
 
-# Context
-
-Bugfix #1:
+# Bugfix #1:
 
 The out-of-the-box default for sbasm is that it will produce a warning if you try to assemble files that generate code/data past the $FFFF address.
+
 (For example, you are trying to create a disk image.)
 
 That is, this assembly ...
@@ -33,7 +32,7 @@ The patch in [sbapack/cr6502.py](cr6502.py) increases the limit to 32 MB (the ma
 Unfortunately, there is no command line switch or directive to turn this warning off.
 
 
-Bugfix #2:
+# Bugfix #2:
 
 Imagine for a second if Mathematicians decided that these two expressions were NOT equivalent:
 
