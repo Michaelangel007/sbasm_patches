@@ -400,7 +400,18 @@ def CrossInit():
         sys.stdout.write('Loaded ' + dec.Cross.Name[2:] +
                          ' overlay version ' + crossversion + dec.EOL)
 
-    dec.Asm.Max_Address = dec.MAX16
+    # Allow assembled output files > 64 KB (max 32 MB for ProDOS volume)
+    # NOTE: This is the maximum output ADDRESS and not the max file SIZE
+    # i.e.
+    #      dec.Asm.Max_Address = 0
+    #
+    #     .org $100
+    #     .db 1     ; FAIL; address $0100 > $0000
+    #
+    #     .org $0
+    #     .db 1     ; PASS; address $0000 <= $0000
+    #dec.Asm.Max_Address = dec.MAX16
+    dec.Asm.Max_Address = 0x1FFFFFF
     dec.Asm.PP_TA_Factor = 1
     dec.Flags.BigEndian = False
 
