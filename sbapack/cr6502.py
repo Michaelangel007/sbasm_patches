@@ -41,7 +41,7 @@ def Help():
     # Especially if the D flag is set, most data instructions take 1 cycle
     # more.
     # Also if indexes cross a page boundary the instruction takes 1 cycle more.
-    # The document W65C02S contains some errors/inconsistencies regardging
+    # The document W65C02S contains some errors/inconsistencies regarding
     # timings
 
 
