@@ -37,7 +37,7 @@ def Help():
     # *  add 1 if page boundary is crossed
     # ** add 1 if branch occurs to same page
     #    add 2 if branch occurs to next page
-    # The Cmos chips have different timings.
+    # The CMOS chips have different timings.
     # Especially if the D flag is set, most data instructions take 1 cycle
     # more.
     # Also if indexes cross a page boundary the instruction takes 1 cycle more.
